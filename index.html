@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dial Pad Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      background: linear-gradient(270deg, #ff9a9e, #fad0c4, #fbc2eb, #a1c4fd);
+      background-size: 800% 800%;
+      animation: gradientBG 12s ease infinite;
+      min-height: 100vh;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    h1 {
+      color: white;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+      font-size: 2em;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      max-width: 500px;
+      width: 100%;
+      transition: transform 0.3s ease;
+    }
+    .container:hover {
+      transform: scale(1.02);
+    }
+
+    textarea {
+      width: 100%;
+      height: 60px;
+      margin: 10px 0;
+      padding: 12px;
+      border: none;
+      outline: none;
+      border-radius: 8px;
+      font-size: 16px;
+      background: rgba(255,255,255,0.8);
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+      transition: box-shadow 0.3s ease;
+    }
+    textarea:focus {
+      box-shadow: 0 0 10px rgba(0, 150, 255, 0.7);
+    }
+
+    button {
+      background: linear-gradient(45deg, #4CAF50, #2e8b57);
+      color: white;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 5px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    button:hover {
+      background: linear-gradient(45deg, #66bb6a, #3cb371);
+      box-shadow: 0 8px 20px rgba(0,255,150,0.4);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📱 Dial Pad Converter</h1>
+  <div class="container">
+    <label style="color:white;">Text Input:</label>
+    <textarea id="textInput" placeholder="Type letters..."></textarea>
+
+    <label style="color:white;">Number Output:</label>
+    <textarea id="numberOutput" placeholder="Numbers will appear here..."></textarea>
+
+    <button onclick="textToNumber()">Convert to Numbers</button>
+    <button onclick="numberToText()">Convert to Text</button>
+  </div>
+
+<script>
+const dialPad = {
+  2: "ABC",
+  3: "DEF",
+  4: "GHI",
+  5: "JKL",
+  6: "MNO",
+  7: "PQRS",
+  8: "TUV",
+  9: "WXYZ"
+};
+
+const specialMap = {
+  " ": "0",
+  ".": "*",
+  ",": "#",
+  "?": "@",
+  "!": "&"
+};
+
+const reverseSpecialMap = Object.fromEntries(
+  Object.entries(specialMap).map(([k,v]) => [v,k])
+);
+
+function textToNumber() {
+  let text = document.getElementById("textInput").value.toUpperCase();
+  let result = "";
+  
+  for (let char of text) {
+    if (specialMap[char] !== undefined) {
+      result += specialMap[char];
+    } else {
+      for (let num in dialPad) {
+        let index = dialPad[num].indexOf(char);
+        if (index !== -1) {
+          result += num + "(" + (index+1) + ")";
+          break;
+        }
+      }
+    }
+  }
+  
+  document.getElementById("numberOutput").value = result;
+}
+
+function numberToText() {
+  let numberStr = document.getElementById("numberOutput").value.trim();
+  let result = "";
+
+  let matches = numberStr.match(/(\d\(\d\)|[0-9*#@&])/g);
+  if (matches) {
+    for (let item of matches) {
+      if (reverseSpecialMap[item] !== undefined) {
+        result += reverseSpecialMap[item];
+      } else if (item.length === 4 && item[1] === "(" && item[3] === ")") {
+        let num = item[0];
+        let pos = parseInt(item[2]);
+        let letters = dialPad[num];
+        if (letters && pos <= letters.length) {
+          result += letters[pos-1];
+        }
+      }
+    }
+  }
+  
+  document.getElementById("textInput").value = result;
+}
+</script>
+
+</body>
+</html>
